@@ -95,7 +95,7 @@ EOF
     local art_style="$4"
 
     local i
-    for i in {0..22}; do
+    for i in {0..25}; do
       local line="${art_lines[$i]}"
       
       # Print the ASCII art part
@@ -126,20 +126,20 @@ EOF
 
   # 1. Draw art line-by-line
   local i
-  for i in {0..22}; do
-    # printf '%b%s%b\n' "${draw_style}" "${art_lines[$i]}" "${NC}"
+  for i in {0..25}; do
+    printf '%b%s%b\n' "${draw_style}" "${art_lines[$i]}" "${NC}"
     sleep 0.03
   done
 
-  # Move up 23 lines to start animation
-  printf "\033[23A"
+  # Move up 26 lines to start animation
+  printf "\033[26A"
 
   # 2. Scanning sweep (Cyan pulse)
   local idx
-  for idx in {0..22}; do
+  for idx in {0..25}; do
     print_frame "$idx" "${GRAY}" "${GRAY}" "${GREEN}"
     sleep 0.05
-    printf "\033[23A"
+    printf "\033[26A"
   done
 
   # 3. Flashing text/alert 3 times
@@ -147,11 +147,11 @@ EOF
   for k in {1..3}; do
     print_frame "-1" "${GRAY}" "${GRAY}" "${GREEN}"
     sleep 0.15
-    printf "\033[23A"
+    printf "\033[26A"
     print_frame "-1" "${BRED}" "${BYELLOW}" "${GREEN}"
     sleep 0.15
     if (( k < 3 )); then
-      printf "\033[23A"
+      printf "\033[26A"
     fi
   done
 
