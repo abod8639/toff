@@ -1,0 +1,51 @@
+# Maintainer: abod8639 <https://github.com/abod8639>
+pkgname=toff
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="CLI shutdown timer with YouTube/media URL support"
+arch=('any')
+url="https://github.com/abod8639/toff"
+license=('MIT')
+depends=(
+    'bash'          # >= 4.0 required
+    'yt-dlp'        # URL/media duration extraction
+    'util-linux'    # getopt, shutdown
+)
+optdepends=(
+    'libnotify: desktop notifications on shutdown'
+    'at: alternative scheduling backend (atd must be running)'
+)
+source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+b2sums=('SKIP')
+
+# ── sudoers snippet for non-systemd systems ────────────────────────────────
+# On systemd (default Arch), logind handles poweroff — no sudo needed.
+# Uncomment the block below in post_install() if targeting non-systemd systems.
+
+package() {
+    cd "$pkgname-$pkgver"
+    make PREFIX=/usr DESTDIR="$pkgdir" install
+}
+
+post_install() {
+    echo ""
+    echo "==> toff installed successfully!"
+    echo ""
+    echo "==> On systemd (default Arch Linux), no extra configuration is needed."
+    echo "    The active console user can poweroff without sudo via logind."
+    echo ""
+    echo "==> On non-systemd systems (OpenRC, runit, s6, SysV):"
+    echo "    To avoid sudo password prompts, add the following via visudo:"
+    echo ""
+    echo "    %wheel ALL=(ALL) NOPASSWD: /usr/bin/poweroff, /usr/bin/shutdown, /usr/bin/halt"
+    echo ""
+    echo "==> Quick start:"
+    echo "    toff 1.30                          # shutdown in 1h 30m"
+    echo "    toff https://youtu.be/VIDEO_ID     # shutdown after video ends"
+    echo "    toff --cancel                      # cancel pending shutdown"
+    echo ""
+}
+
+post_upgrade() {
+    post_install
+}
