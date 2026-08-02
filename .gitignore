@@ -1,0 +1,16 @@
+# toff — gitignore
+
+# Runtime state
+/tmp/toff/
+
+# Editor backup files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test artifacts
+/test/output/
+
+# Build artifacts (none currently, but reserved)
+/dist/
