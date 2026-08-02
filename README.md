@@ -1,4 +1,4 @@
-# toff ⏳
+# toff 
 
 A lightweight, animated Bash utility to schedule system shutdowns based on a countdown timer or the duration of online media (YouTube, SoundCloud, etc.).
 
