@@ -1,0 +1,135 @@
+.TH TOFF 1 "August 2026" "toff 1.0.0" "User Commands"
+
+.SH NAME
+toff \- shutdown timer with YouTube/media URL support
+
+.SH SYNOPSIS
+.B toff
+[\fIOPTIONS\fR] \fI<TIME|URL>\fR
+.br
+.B toff
+\fB\-\-cancel\fR
+
+.SH DESCRIPTION
+.B toff
+schedules a safe system poweroff after a specified duration.
+Time can be given directly or extracted automatically from a YouTube video,
+playlist, or any media URL supported by \fByt-dlp\fR(1).
+
+.SH TIME FORMATS
+.TP
+.B H.MM
+Hours and minutes (e.g.\& \fB1.30\fR = 1 hour 30 minutes).
+.TP
+.B MM
+Minutes only (e.g.\& \fB90\fR = 90 minutes).
+.TP
+.B HH:MM
+Hours and minutes (e.g.\& \fB1:30\fR).
+.TP
+.B HH:MM:SS
+Full duration (e.g.\& \fB1:30:00\fR).
+
+.SH URL SUPPORT
+When a URL is given, \fBtoff\fR uses \fByt-dlp\fR to fetch the media duration.
+YouTube playlists are auto-detected and all video durations are summed.
+Over 1000 sites are supported including SoundCloud and Vimeo.
+
+.SH OPTIONS
+.TP
+.BR \-b ", " \-\-buffer " " \fIMINUTES\fR
+Add extra buffer time after the media ends. Default is 2 minutes.
+.TP
+.BR \-p ", " \-\-playlist
+Force playlist mode: fetch and sum all durations in the playlist.
+.TP
+.B \-\-no\-playlist
+Disable automatic playlist detection.
+.TP
+.BR \-n ", " \-\-no\-banner
+Skip the ASCII art banner animation.
+.TP
+.BR \-q ", " \-\-quiet
+Suppress the live countdown display.
+.TP
+.BR \-c ", " \-\-cancel
+Cancel a pending \fBtoff\fR shutdown.
+.TP
+.BR \-v ", " \-\-version
+Print version and exit.
+.TP
+.BR \-h ", " \-\-help
+Show usage information and exit.
+
+.SH EXAMPLES
+Shut down in 1 hour and 30 minutes:
+.RS
+.B toff 1.30
+.RE
+
+Shut down in 90 minutes:
+.RS
+.B toff 90
+.RE
+
+Shut down after a YouTube video ends (+ 2 min buffer):
+.RS
+.B toff https://youtu.be/dQw4w9WgXcQ
+.RE
+
+Shut down after a playlist with a 5-minute buffer:
+.RS
+.B toff \-\-buffer 5 \-\-playlist 'https://youtube.com/playlist?list=PL...'
+.RE
+
+Cancel a pending shutdown:
+.RS
+.B toff \-\-cancel
+.RE
+
+.SH SHUTDOWN STRATEGY
+.B toff
+tries multiple scheduling strategies in order:
+.IP 1. 4
+\fBshutdown\fR command (survives terminal close; most portable)
+.IP 2. 4
+\fBsystemd-run --on-active\fR (precise timer, systemd only)
+.IP 3. 4
+\fBat\fR command (cross-distro, survives terminal close)
+.IP 4. 4
+Background \fBsleep\fR + \fBpoweroff\fR (universal fallback)
+
+.SH FILES
+.TP
+.I ${XDG_RUNTIME_DIR}/toff/
+Runtime state directory. Stores timer PID, scheduling method, and keepalive PID.
+Removed automatically on cancel.
+
+.SH DEPENDENCIES
+.TP
+.B yt-dlp
+Required for URL mode. Install with \fBsudo pacman \-S yt\-dlp\fR on Arch Linux.
+.TP
+.B bash >= 4.0
+Required for associative arrays and other features.
+.TP
+.B getopt
+Required for argument parsing (part of util-linux).
+
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Error (invalid input, missing dependency, scheduling failure).
+
+.SH AUTHORS
+abod8639 <https://github.com/abod8639>
+
+.SH SEE ALSO
+.BR shutdown (8),
+.BR poweroff (8),
+.BR systemctl (1),
+.BR yt-dlp (1),
+.BR at (1)
