@@ -26,34 +26,67 @@ show_banner() {
   # Check if stdout is a terminal for colors and animation
   if [[ ! -t 1 ]]; then
     cat <<'EOF'
-    .-.
-   (   )   POWER OFF
-    `-'
-   /|\
-  /_|_\
-  |  |  |
-  |  |  |  SYSTEM SHUTDOWN
-  |__|__|
-    ||
-    ||
-   /  \
+                       ,~"~.
+     ,_.,              &gt; ::::
+    /   \%~,          &lt;, ?::;
+    \0 0/   "q         l_  f
+     |"|    //       ,__}--{_.
+   __.T._  //       /         }
+,p}---V--{d'       /          !
+!\ ---I---        /  ,    1  J;
+ \\ --^--  _,___.'  /1    !  Y
+  `b=====%/_l_____.' |    l /
+     }={             l     f
+   (`~=~')           I===I=I
+   p(o_o)            f     }
+   \\~^~|            |     }
+    \\ ||            l    Y;
+     \\||            }    |
+      \\|            |    |
+       })           ,1    |
+      //|           !l   ,l
+     //||           ! \    \
+    // ||           !  \    \
+   pf  d|           l___j.   \
+  (X\  {Xy,     ,.-'`--(  `.,'`.
+   `\\    ``    `-'~x__J    j'  &gt;
+     ``                   ,/ ,^'
+                         f__J
 EOF
     return
   fi
 
-  local art_lines=(
-    "    .-."
-    "   (   )"
-    "    \`-'"
-    "   /|\\"
-    "  /_|_\\"
-    "  |  |  |"
-    "  |  |  |"
-    "  |__|__|"
-    "    ||"
-    "    ||"
-    "   /  \\"
-  )
+  local art_lines=()
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    art_lines+=("$line")
+  done <<'EOF'
+                       ,~"~.
+     ,_.,              &gt; ::::
+    /   \%~,          &lt;, ?::;
+    \0 0/   "q         l_  f
+     |"|    //       ,__}--{_.
+   __.T._  //       /         }
+,p}---V--{d'       /          !
+!\ ---I---        /  ,    1  J;
+ \\ --^--  _,___.'  /1    !  Y
+  `b=====%/_l_____.' |    l /
+     }={             l     f
+   (`~=~')           I===I=I
+   p(o_o)            f     }
+   \\~^~|            |     }
+    \\ ||            l    Y;
+     \\||            }    |
+      \\|            |    |
+       })           ,1    |
+      //|           !l   ,l
+     //||           ! \    \
+    // ||           !  \    \
+   pf  d|           l___j.   \
+  (X\  {Xy,     ,.-'`--(  `.,'`.
+   `\\    ``    `-'~x__J    j'  &gt;
+     ``                   ,/ ,^'
+                         f__J 
+EOF
 
   print_frame() {
     local highlight_idx="$1"
@@ -62,7 +95,7 @@ EOF
     local art_style="$4"
 
     local i
-    for i in {0..10}; do
+    for i in {0..22}; do
       local line="${art_lines[$i]}"
       
       # Print the ASCII art part
@@ -93,20 +126,20 @@ EOF
 
   # 1. Draw art line-by-line
   local i
-  for i in {0..10}; do
-    printf '%b%s%b\n' "${draw_style}" "${art_lines[$i]}" "${NC}"
+  for i in {0..22}; do
+    # printf '%b%s%b\n' "${draw_style}" "${art_lines[$i]}" "${NC}"
     sleep 0.03
   done
 
-  # Move up 11 lines to start animation
-  printf "\033[11A"
+  # Move up 23 lines to start animation
+  printf "\033[23A"
 
   # 2. Scanning sweep (Cyan pulse)
   local idx
-  for idx in {0..10}; do
+  for idx in {0..22}; do
     print_frame "$idx" "${GRAY}" "${GRAY}" "${GREEN}"
     sleep 0.05
-    printf "\033[11A"
+    printf "\033[23A"
   done
 
   # 3. Flashing text/alert 3 times
@@ -114,11 +147,11 @@ EOF
   for k in {1..3}; do
     print_frame "-1" "${GRAY}" "${GRAY}" "${GREEN}"
     sleep 0.15
-    printf "\033[11A"
+    printf "\033[23A"
     print_frame "-1" "${BRED}" "${BYELLOW}" "${GREEN}"
     sleep 0.15
     if (( k < 3 )); then
-      printf "\033[11A"
+      printf "\033[23A"
     fi
   done
 
