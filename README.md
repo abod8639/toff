@@ -1,7 +1,12 @@
-# toff 
+# toff ⏳
 
 A lightweight, animated Bash utility to schedule system shutdowns based on a countdown timer or the duration of online media (YouTube, SoundCloud, etc.).
+
+[![Bash](https://img.shields.io/badge/shell-bash-4EAA25.svg)](https://www.gnu.org/software/bash/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![AUR version](https://img.shields.io/aur/version/toff.svg)](https://aur.archlinux.org/packages/toff)
+[![Platform](https://img.shields.io/badge/platform-linux-lightgrey.svg)](https://www.kernel.org)
+
 ---
 
 ## Features
