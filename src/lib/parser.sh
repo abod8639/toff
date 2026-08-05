@@ -19,11 +19,11 @@ toff_parse_time() {
     if [[ "$input" =~ ^([0-9]+)\.([0-9]{1,2})$ ]]; then
         local hours="${BASH_REMATCH[1]}"
         local mins="${BASH_REMATCH[2]}"
-        if (( mins >= 60 )); then
+        if (( 10#$mins >= 60 )); then
             printf 'toff: error: minutes part must be < 60 (got %s).\n' "$mins" >&2
             return 1
         fi
-        total_seconds=$(( hours * 3600 + mins * 60 ))
+        total_seconds=$(( 10#$hours * 3600 + 10#$mins * 60 ))
 
     # ── HH:MM:SS format ───────────────────────────────────────────────────
     elif [[ "$input" =~ ^([0-9]+):([0-9]{2}):([0-9]{2})$ ]]; then
@@ -48,7 +48,7 @@ toff_parse_time() {
 
     # ── Plain minutes (e.g. 90) ───────────────────────────────────────────
     elif [[ "$input" =~ ^([0-9]+)$ ]]; then
-        total_seconds=$(( BASH_REMATCH[1] * 60 ))
+        total_seconds=$(( 10#${BASH_REMATCH[1]} * 60 ))
 
     # ── Unknown ───────────────────────────────────────────────────────────
     else
