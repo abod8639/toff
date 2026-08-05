@@ -20,11 +20,14 @@ _TOFF_SELF_DIR="$(dirname "$_TOFF_SELF")"
 if [[ -d "${_TOFF_SELF_DIR}/lib" ]]; then
     # Running from source tree: src/toff → src/lib/
     export TOFF_LIB_DIR="${_TOFF_SELF_DIR}/lib"
+elif [[ -d "$(dirname "$_TOFF_SELF_DIR")/lib/toff" ]]; then
+    # Installed relative path (e.g. PREFIX/bin/toff -> PREFIX/lib/toff)
+    export TOFF_LIB_DIR="$(dirname "$_TOFF_SELF_DIR")/lib/toff"
 elif [[ -d "/usr/lib/toff" ]]; then
-    # Installed via Makefile (PREFIX=/usr)
+    # Fallback to standard installation paths
     export TOFF_LIB_DIR="/usr/lib/toff"
 elif [[ -d "/usr/local/lib/toff" ]]; then
-    # Installed via Makefile (PREFIX=/usr/local)
+    # Fallback to standard installation paths
     export TOFF_LIB_DIR="/usr/local/lib/toff"
 else
     echo "toff: fatal: cannot locate library directory." >&2
@@ -127,6 +130,13 @@ _parse_args() {
 main() {
     local input
     input=$(_parse_args "$@")
+
+    # Prevent overlapping timers
+    if [[ -d "$TOFF_STATE_DIR" ]]; then
+        echo "toff: error: a shutdown timer is already active." >&2
+        echo "toff: hint:  use 'toff --cancel' to stop it first." >&2
+        exit 1
+    fi
 
     local total_seconds=0
     local label=""
