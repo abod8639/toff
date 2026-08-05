@@ -8,7 +8,7 @@
 # https://github.com/abod8639/toff
 set -euo pipefail
 
-readonly TOFF_VERSION="1.0.0"
+readonly TOFF_VERSION="1.0.1"
 
 # ── State directory (cleared on cancel / after shutdown) ──────────────────
 export TOFF_STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/toff"
