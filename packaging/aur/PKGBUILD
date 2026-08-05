@@ -1,6 +1,6 @@
 # Maintainer: abod8639 <https://github.com/abod8639>
 pkgname=toff
-pkgver=1.0.1
+pkgver=1.0.0
 pkgrel=1
 pkgdesc="CLI shutdown timer with YouTube/media URL support"
 arch=('any')

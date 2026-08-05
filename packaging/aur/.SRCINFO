@@ -1,6 +1,6 @@
 pkgbase = toff
 	pkgdesc = CLI shutdown timer with YouTube/media URL support
-	pkgver = 1.0.1
+	pkgver = 1.0.0
 	pkgrel = 1
 	url = https://github.com/abod8639/toff
 	arch = any
