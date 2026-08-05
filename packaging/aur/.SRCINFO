@@ -3,6 +3,7 @@ pkgbase = toff
 	pkgver = 1.0.0
 	pkgrel = 1
 	url = https://github.com/abod8639/toff
+	install = toff.install
 	arch = any
 	license = MIT
 	depends = bash
@@ -10,7 +11,7 @@ pkgbase = toff
 	depends = util-linux
 	optdepends = libnotify: desktop notifications on shutdown
 	optdepends = at: alternative scheduling backend (atd must be running)
-	source = toff-1.0.1.tar.gz::https://github.com/abod8639/toff/archive/v1.0.1.tar.gz
-	b2sums = SKIP
+	source = toff-1.0.0.tar.gz::https://github.com/abod8639/toff/archive/v1.0.0.tar.gz
+	b2sums = c1f6ca7c1c091901dcbdb7353aa4989d5be0e8421571a1c25b8df5be7c351c6abc3689c4f1e8fb6300549df29bc82d023bc24fa99837d4f73c972f87f3818ab8
 
 pkgname = toff
