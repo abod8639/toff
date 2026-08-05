@@ -17,7 +17,7 @@ optdepends=(
     'at: alternative scheduling backend (atd must be running)'
 )
 source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
-b2sums=('c1f6ca7c1c091901dcbdb7353aa4989d5be0e8421571a1c25b8df5be7c351c6abc3689c4f1e8fb6300549df29bc82d023bc24fa99837d4f73c972f87f3818ab8')
+b2sums=('12657c407b3a4192244b290fa276b15d92e71cfc37daa04958bb8bac4c0a43c7cb490f9c4409465bfa9628466e07ac88a03896c5c4536092769e73167b18d856')
 
 # ── sudoers snippet for non-systemd systems ────────────────────────────────
 # On systemd (default Arch), logind handles poweroff — no sudo needed.
