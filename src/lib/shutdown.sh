@@ -96,8 +96,7 @@ toff_schedule() {
         if sudo shutdown -P "+${minutes}" &>/dev/null 2>&1 \
         || sudo shutdown -h "+${minutes}" &>/dev/null 2>&1; then
             echo "SHUTDOWN" > "${TOFF_STATE_DIR}/method"
-            printf "  minutes" > "${TOFF_STATE_DIR}/minutes"
-            echo "$minutes" >> "${TOFF_STATE_DIR}/minutes"
+            echo "$minutes" > "${TOFF_STATE_DIR}/minutes"
             return 0
         fi
     fi
