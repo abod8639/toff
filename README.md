@@ -1,37 +1,52 @@
-# toff 
+# toff
 
-A lightweight, animated Bash utility to schedule system shutdowns based on a countdown timer or the duration of online media (YouTube, SoundCloud, etc.).
+A lightweight Bash utility to schedule system shutdowns based on a countdown timer or the duration of online media (YouTube, SoundCloud, etc.).
 
-[![Bash](https://img.shields.io/badge/shell-bash-4EAA25.svg)](https://www.gnu.org/software/bash/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![AUR version](https://img.shields.io/aur/version/toff.svg)](https://aur.archlinux.org/packages/toff)
-[![Platform](https://img.shields.io/badge/platform-linux-lightgrey.svg)](https://www.kernel.org)
+<p align="center">
+  <a href="https://www.gnu.org/software/bash/"><img src="https://img.shields.io/badge/shell-bash-4EAA25.svg" alt="Bash" /></a>
+  <a href="https://github.com/abod8639/toff"><img src="https://img.shields.io/badge/github-1000000?style=social&logo=github" alt="Github" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+  <a href="https://aur.archlinux.org/packages/toff"><img src="https://img.shields.io/aur/version/toff" alt="AUR version" /></a>
+  <a href="https://www.kernel.org"><img src="https://img.shields.io/badge/platform-linux-blue.svg" alt="Platform" /></a>
+</p>
 
 ---
 
 ## Features
 
 - **Flexible Time Formats:** Supports `H.MM`, `MM`, `HH:MM`, and `HH:MM:SS`.
-- **Media-Aware Shutdown:** Fetches duration of video/playlist URLs (using `yt-dlp`) and schedules shutdown accordingly.
-- **Custom Buffer:** Add extra cushion time after media ends (e.g. `+5` minutes).
+- **Media-Aware Shutdown:** Fetches the duration of video/playlist URLs (using `yt-dlp`) and schedules a shutdown accordingly.
+- **Custom Buffer:** Add extra cushion time after media ends (e.g., `+5` minutes).
 - **Rich Terminal UI:** Displays a custom ASCII scanning & flashing animation before initiation.
+- **Shell Completions:** Native completion support for Bash, Zsh, and Fish shells.
 - **Safety First:** Prevents multiple overlapping timers and provides a quick cancel command.
+- **Cross-Init Compatibility:** Works out-of-the-box with `systemd`, `OpenRC`, `Runit`, `s6`, and `SysV` init systems.
 
 ---
 
 ## Installation
 
-Clone the repository and run:
+### Arch Linux (AUR)
+
+You can install `toff` directly from the AUR using your favorite AUR helper:
 
 ```bash
+yay -S toff
+```
+
+
+
+
+### Other Linux Distributions (From Source)
+
+Clone the repository and use the `Makefile`:
+
+```bash
+git clone https://github.com/abod8639/toff.git
+cd toff
+
 # System-wide (installs to /usr/local/bin)
 sudo make install
-
-# System-wide (alternative path /usr/bin)
-sudo make install PREFIX=/usr
-
-# Local user-only (installs to ~/.local/bin)
-make install PREFIX=$HOME/.local
 ```
 
 ---
@@ -42,6 +57,19 @@ make install PREFIX=$HOME/.local
 toff [OPTIONS] <TIME|URL>
 toff --cancel
 ```
+
+### Options
+
+| Option | Long Option | Description | Default |
+| :--- | :--- | :--- | :--- |
+| `-b <min>` | `--buffer <min>` | Extra time added after media ends | `2` |
+| `-p` | `--playlist` | Force playlist mode (sums all video durations) | Auto |
+| | `--no-playlist` | Disable playlist auto-detection | |
+| `-n` | `--no-banner` | Skip the banner animation | |
+| `-q` | `--quiet` | Suppress the countdown display | |
+| `-c` | `--cancel` | Cancel any pending toff shutdown | |
+| `-v` | `--version` | Print version and exit | |
+| `-h` | `--help` | Show help information | |
 
 ### Examples
 
@@ -57,22 +85,36 @@ toff 1:15:00  # Shutdown in 1 hour, 15 minutes, and 0 seconds
 toff "https://www.youtube.com/watch?v=dQw4w9WgXcQ"   # Shuts down after video ends + 2m buffer
 toff -b 10 "https://soundcloud.com/..."             # Shuts down after track ends + 10m buffer
 toff --playlist "https://youtube.com/playlist?..."   # Sums up the entire playlist duration
+toff --no-playlist "https://youtube.com/playlist?..." # Force single video mode, ignore auto-detect
 ```
 
-#### 3. Cancel Timer
+#### 3. UI & Display Customization
 ```bash
-toff --cancel  # Stop any scheduled shutdown
+toff -n 45      # Start a 45-minute timer without showing the ASCII banner
+toff -q 1.30    # Start a 1h 30m timer quietly (suppresses the countdown ticker)
+toff -nq 30     # Start a 30-minute timer quietly and without the banner
 ```
 
+#### 4. Cancel Pending Timer
+```bash
+toff -c   # Stop any pending scheduled shutdown
+```
+
+#### 5. Help & Version Information
+```bash
+toff -h         # Show detailed help instructions and options
+toff -v         # Print the installed version of toff
+```
 ---
 
 ## Dependencies
 
-- **System:** `systemd` (uses `shutdown`)
+- **System:** A Linux system with one of the supported init systems (`systemd`, `OpenRC`, `Runit`, `s6`, `SysV`).
+- **Build Tools:** `make` (required for manual installation).
 - **Optional (for media URLs):** [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 
 ---
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](file:///home/dexter/bash/shotdown_poweroff/LICENSE) for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
