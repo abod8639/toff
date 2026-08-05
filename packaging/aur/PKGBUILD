@@ -6,6 +6,7 @@ pkgdesc="CLI shutdown timer with YouTube/media URL support"
 arch=('any')
 url="https://github.com/abod8639/toff"
 license=('MIT')
+install=toff.install
 depends=(
     'bash'          # >= 4.0 required
     'yt-dlp'        # URL/media duration extraction
@@ -27,25 +28,3 @@ package() {
     make PREFIX=/usr DESTDIR="$pkgdir" install
 }
 
-post_install() {
-    echo ""
-    echo "==> toff installed successfully!"
-    echo ""
-    echo "==> On systemd (default Arch Linux), no extra configuration is needed."
-    echo "    The active console user can poweroff without sudo via logind."
-    echo ""
-    echo "==> On non-systemd systems (OpenRC, runit, s6, SysV):"
-    echo "    To avoid sudo password prompts, add the following via visudo:"
-    echo ""
-    echo "    %wheel ALL=(ALL) NOPASSWD: /usr/bin/poweroff, /usr/bin/shutdown, /usr/bin/halt"
-    echo ""
-    echo "==> Quick start:"
-    echo "    toff 1.30                          # shutdown in 1h 30m"
-    echo "    toff https://youtu.be/VIDEO_ID     # shutdown after video ends"
-    echo "    toff --cancel                      # cancel pending shutdown"
-    echo ""
-}
-
-post_upgrade() {
-    post_install
-}
