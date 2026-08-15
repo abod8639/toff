@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+# toff — Timer Off
+# Schedules a safe system poweroff after a given time or media URL duration.
+#
+# Usage:  toff [OPTIONS] <TIME|URL>
+#         toff --cancel
+#
+# https://github.com/abod8639/toff
+set -euo pipefail
+
+readonly TOFF_VERSION="1.0.0"
+
+# ── State directory (cleared on cancel / after shutdown) ──────────────────
+export TOFF_STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/toff"
+
+# ── Library path resolution (works locally AND when installed) ────────────
+_TOFF_SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+_TOFF_SELF_DIR="$(dirname "$_TOFF_SELF")"
+
+if [[ -d "${_TOFF_SELF_DIR}/lib" ]]; then
+    # Running from source tree: src/toff → src/lib/
+    export TOFF_LIB_DIR="${_TOFF_SELF_DIR}/lib"
+elif [[ -d "$(dirname "$_TOFF_SELF_DIR")/lib/toff" ]]; then
+    # Installed relative path (e.g. PREFIX/bin/toff -> PREFIX/lib/toff)
+    export TOFF_LIB_DIR="$(dirname "$_TOFF_SELF_DIR")/lib/toff"
+elif [[ -d "/usr/lib/toff" ]]; then
+    # Fallback to standard installation paths
+    export TOFF_LIB_DIR="/usr/lib/toff"
+elif [[ -d "/usr/local/lib/toff" ]]; then
+    # Fallback to standard installation paths
+    export TOFF_LIB_DIR="/usr/local/lib/toff"
+else
+    echo "toff: fatal: cannot locate library directory." >&2
+    exit 1
+fi
+
+# Source all libraries
+for _lib in banner countdown media parser shutdown; do
+    # shellcheck source=/dev/null
+    source "${TOFF_LIB_DIR}/${_lib}.sh" || {
+        echo "toff: fatal: failed to load ${_lib}.sh from ${TOFF_LIB_DIR}/" >&2
+        exit 1
+    }
+done
+
+# ── Defaults ──────────────────────────────────────────────────────────────
+TOFF_BUFFER_MINUTES=2
+TOFF_SHOW_BANNER=true
+TOFF_SHOW_COUNTDOWN=true
+TOFF_PLAYLIST_MODE="auto"   # auto | true | false
+
+# ── Usage ─────────────────────────────────────────────────────────────────
+_usage() {
+    cat <<EOF
+toff ${TOFF_VERSION} — Shutdown Timer
+
+Usage:
+  toff [OPTIONS] <TIME|URL>
+  toff --cancel
+
+Time Formats:
+  H.MM        Hours + minutes   (e.g. 1.30  = 1h 30m)
+  MM          Minutes only      (e.g. 90    = 90 minutes)
+  HH:MM       Hours + minutes   (e.g. 1:30)
+  HH:MM:SS    Full duration     (e.g. 1:30:00)
+
+URL Support  (requires yt-dlp):
+  YouTube videos, playlists, SoundCloud, Vimeo, and 1000+ sites.
+  Playlist URLs are detected automatically.
+
+Options:
+  -b, --buffer MINUTES    Extra time added after media ends  [default: 2]
+  -p, --playlist          Force playlist mode (sum all video durations)
+      --no-playlist       Disable playlist auto-detection
+  -n, --no-banner         Skip the banner animation
+  -q, --quiet             Suppress the countdown display
+  -c, --cancel            Cancel a pending toff shutdown
+  -v, --version           Print version and exit
+  -h, --help              Show this help
+
+Examples:
+  toff 1.30
+  toff 90
+  toff https://youtu.be/dQw4w9WgXcQ
+  toff --buffer 5 https://youtu.be/dQw4w9WgXcQ
+  toff -p 'https://youtube.com/playlist?list=PL...'
+  toff --cancel
+EOF
+}
+
+# ── Argument parsing ───────────────────────────────────────────────────────
+_parse_args() {
+    local parsed
+    parsed=$(getopt \
+        -o b:pnqcvh \
+        -l buffer:,playlist,no-playlist,no-banner,quiet,cancel,version,help \
+        -n toff \
+        -- "$@") || { _usage >&2; exit 1; }
+    eval set -- "$parsed"
+
+    while true; do
+        case "$1" in
+            -b|--buffer)
+                if ! [[ "$2" =~ ^[0-9]+$ ]]; then
+                    echo "toff: error: --buffer requires a non-negative integer." >&2
+                    exit 1
+                fi
+                TOFF_BUFFER_MINUTES="$2"; shift 2 ;;
+            -p|--playlist)     TOFF_PLAYLIST_MODE="true"; shift ;;
+               --no-playlist)  TOFF_PLAYLIST_MODE="false"; shift ;;
+            -n|--no-banner)    TOFF_SHOW_BANNER="false"; shift ;;
+            -q|--quiet)        TOFF_SHOW_COUNTDOWN="false"; shift ;;
+            -c|--cancel)       toff_cancel; exit 0 ;;
+            -v|--version)      echo "toff ${TOFF_VERSION}"; exit 0 ;;
+            -h|--help)         _usage; exit 0 ;;
+            --)                shift; break ;;
+            *)                 echo "toff: unknown option: $1" >&2; exit 1 ;;
+        esac
+    done
+
+    if [[ $# -ne 1 ]]; then
+        _usage >&2
+        exit 1
+    fi
+
+    printf '%s' "$1"
+}
+
+# ── Main ──────────────────────────────────────────────────────────────────
+main() {
+    local input
+    input=$(_parse_args "$@")
+
+    # Prevent overlapping timers
+    if [[ -d "$TOFF_STATE_DIR" ]]; then
+        echo "toff: error: a shutdown timer is already active." >&2
+        echo "toff: hint:  use 'toff --cancel' to stop it first." >&2
+        exit 1
+    fi
+
+    local total_seconds=0
+    local label=""
+
+    if toff_is_url "$input"; then
+        # ── URL mode ──────────────────────────────────────────────────────
+
+        # Auto-detect playlist unless explicitly overridden
+        if [[ "$TOFF_PLAYLIST_MODE" == "auto" ]]; then
+            if toff_is_playlist_url "$input"; then
+                TOFF_PLAYLIST_MODE="true"
+            else
+                TOFF_PLAYLIST_MODE="false"
+            fi
+        fi
+
+        echo ""
+        local media_seconds
+        media_seconds=$(toff_get_url_duration "$input" "$TOFF_PLAYLIST_MODE") || exit 1
+
+        local buffer_seconds=$(( TOFF_BUFFER_MINUTES * 60 ))
+        total_seconds=$(( media_seconds + buffer_seconds ))
+
+        printf '  Media duration : %s\n' "$(toff_format_duration "$media_seconds")"
+        if (( TOFF_BUFFER_MINUTES > 0 )); then
+            printf '  Buffer         : %dm\n' "$TOFF_BUFFER_MINUTES"
+        fi
+        printf '  Total          : %s\n' "$(toff_format_duration "$total_seconds")"
+        label=" (media + ${TOFF_BUFFER_MINUTES}m buffer)"
+
+    else
+        # ── Manual time mode ──────────────────────────────────────────────
+        total_seconds=$(toff_parse_time "$input") || exit 1
+    fi
+
+    if (( total_seconds <= 0 )); then
+        echo "toff: error: computed time is zero or negative." >&2
+        exit 1
+    fi
+
+    # ── Display ───────────────────────────────────────────────────────────
+    [[ "$TOFF_SHOW_BANNER" == "true" ]] && toff_show_banner
+
+    printf '\n'
+    printf '  Shutdown in    : \033[1;32m%s\033[0m%s\n' \
+        "$(toff_format_duration "$total_seconds")" "$label"
+    printf '  Expected at    : \033[1;33m%s\033[0m\n' \
+        "$(date -d "+${total_seconds} seconds" '+%H:%M:%S' 2>/dev/null || echo "unknown")"
+    printf '\n'
+
+    # ── Schedule ──────────────────────────────────────────────────────────
+    toff_schedule "$total_seconds"
+
+    # ── Countdown ─────────────────────────────────────────────────────────
+    [[ "$TOFF_SHOW_COUNTDOWN" == "true" ]] && toff_show_countdown "$total_seconds"
+
+    echo ""
+    echo "  Shutdown initiated."
+}
+
+main "$@"
