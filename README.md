@@ -26,13 +26,13 @@ A lightweight Bash utility to schedule system shutdowns based on a countdown tim
 
 ## Installation
 
-<!-- ### Arch Linux (AUR) -->
+### Arch Linux (AUR)
 
 You can install `toff` directly from the AUR using your favorite AUR helper:
 
-<!-- ```bash
+```bash
 yay -S toff
-``` -->
+```
 
 
 
