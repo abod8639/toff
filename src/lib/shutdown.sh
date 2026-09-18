@@ -145,6 +145,11 @@ toff_schedule() {
 
 # Cancel a pending toff shutdown.
 toff_cancel() {
+    if [[ ! -d "${TOFF_STATE_DIR}" ]]; then
+        echo "toff: no active timer state found."
+        return 0
+    fi
+
     local method=""
     [[ -f "${TOFF_STATE_DIR}/method" ]] && method=$(< "${TOFF_STATE_DIR}/method")
 
