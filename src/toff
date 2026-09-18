@@ -11,7 +11,7 @@ set -euo pipefail
 readonly TOFF_VERSION="1.0.0"
 
 # ── State directory (cleared on cancel / after shutdown) ──────────────────
-export TOFF_STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/toff"
+export TOFF_STATE_DIR="${TOFF_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/toff}"
 
 # ── Library path resolution (works locally AND when installed) ────────────
 _TOFF_SELF="$(readlink -f "${BASH_SOURCE[0]}")"
@@ -123,13 +123,13 @@ _parse_args() {
         exit 1
     fi
 
-    printf '%s' "$1"
+    TOFF_INPUT="$1"
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────
 main() {
-    local input
-    input=$(_parse_args "$@")
+    _parse_args "$@"
+    local input="$TOFF_INPUT"
 
     # Prevent overlapping timers
     if [[ -d "$TOFF_STATE_DIR" ]]; then
