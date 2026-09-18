@@ -13,7 +13,7 @@ BASH_COMPDIR = $(PREFIX)/share/bash-completion/completions
 ZSH_COMPDIR  = $(PREFIX)/share/zsh/site-functions
 FISH_COMPDIR = $(PREFIX)/share/fish/vendor_completions.d
 
-.PHONY: install uninstall check help
+.PHONY: install uninstall check test coverage help
 
 install:
 	@echo "Installing toff to $(PREFIX)..."
@@ -59,8 +59,20 @@ check:
 	    echo "fmt   → $$(toff_format_duration 5400)  (expect 1h 30m 00s)"'
 	@echo "=== All checks passed ==="
 
+# Run automated test suite
+test:
+	@tests/run_tests.sh
+
+# Run tests and generate kcov coverage report
+coverage:
+	@mkdir -p coverage
+	@kcov --include-path=src coverage tests/run_tests.sh
+	@echo "Coverage report generated in ./coverage"
+
 help:
 	@echo "Targets:"
 	@echo "  install    Install toff (set PREFIX= to override /usr/local)"
 	@echo "  uninstall  Remove toff"
 	@echo "  check      Run syntax and parser checks"
+	@echo "  test       Run automated test suite"
+	@echo "  coverage   Run test suite and generate kcov coverage report"
