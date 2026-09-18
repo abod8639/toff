@@ -3,6 +3,8 @@
 A lightweight Bash utility to schedule system shutdowns based on a countdown timer or the duration of online media (YouTube, SoundCloud, etc.).
 
 <p align="center">
+  <a href="https://github.com/abod8639/toff/actions/workflows/ci.yml"><img src="https://github.com/abod8639/toff/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://app.codecov.io/gh/abod8639/toff"><img src="https://codecov.io/gh/abod8639/toff/graph/badge.svg" alt="Codecov" /></a>
   <a href="https://www.gnu.org/software/bash/"><img src="https://img.shields.io/badge/shell-bash-4EAA25.svg" alt="Bash" /></a>
   <a href="https://github.com/abod8639/toff"><img src="https://img.shields.io/badge/github-1000000?style=social&logo=github" alt="Github" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
@@ -112,6 +114,23 @@ toff -v         # Print the installed version of toff
 - **System:** A Linux system with one of the supported init systems (`systemd`, `OpenRC`, `Runit`, `s6`, `SysV`).
 - **Build Tools:** `make` (required for manual installation).
 - **Optional (for media URLs):** [yt-dlp](https://github.com/yt-dlp/yt-dlp)
+
+
+---
+
+## Development & Testing
+
+Run syntax checks:
+```bash
+make check
+```
+
+Run the automated test suite:
+```bash
+make test
+# or directly:
+./tests/run_tests.sh
+```
 
 ---
 
