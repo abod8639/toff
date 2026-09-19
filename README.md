@@ -39,16 +39,13 @@ yay -S toff
 
 
 
-### Other Linux Distributions (From Source)
+### Other Linux Distributions 
 
 Clone the repository and use the `Makefile`:
 
 ```bash
-git clone https://github.com/abod8639/toff.git
-cd toff
+git clone https://github.com/abod8639/toff.git && cd toff && sudo make install
 
-# System-wide (installs to /usr/local/bin)
-sudo make install
 ```
 
 ---
